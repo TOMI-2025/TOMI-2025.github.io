@@ -1,0 +1,188 @@
+th, td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: center;
+}
+
+.col-name {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: center;
+    min-width: 85px;
+    font-weight: bold;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 100%;
+}
+
+audio {
+    width: 100%;
+}
+
+.audio_td {
+    border: 1px solid black;
+    /*padding: 8px;*/
+    /*text-align: center;*/
+    /*min-width: 85px;*/
+    /*font-weight: bold;*/
+}
+
+pre {
+    text-align: center;
+    width: inherit;
+    font-family: monospace;
+    white-space: pre;
+    background-color: #eaeaea;
+}
+
+.audio_wrapper {
+    display: flex;
+    width: 100%;
+    align-items: center; /* 垂直居中对齐 */
+    gap: 2px; /* 按钮和容器之间的间距 */
+}
+
+.midi_wrapper {
+    /*width: 100%;*/
+    display: flex;
+    flex-direction: column; /* 垂直排列 */
+    align-items: center; /* 让子元素充满宽度 */
+}
+
+midi-player {
+    display: flex;
+    width: inherit;
+    overflow: auto;
+}
+
+midi-visualizer {
+    display: block;
+    width: inherit;
+    overflow: auto;
+}
+
+midi-visualizer .piano-roll-visualizer {
+    width: inherit;
+    overflow: auto;
+    border: 2px solid black;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    margin: 0px;
+    margin-top: 0;
+}
+
+.waveform {
+    width: 100%;
+    font-size: 12px;
+}
+
+.play_btn {
+    width: 40px;
+    height: 40px;
+}
+
+.center-stuff {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.no_bottom_row {
+    border: 0 none;
+}
+
+.slash-wrap {
+    position: relative;
+    box-sizing: border-box;
+    width: 150px;
+    height: 80px;
+}
+
+.table_col {
+    width: 24%;
+}
+
+/* 斜线 */
+.slash {
+    position: absolute;
+    display: block;
+    top: 10px;
+    left: 0;
+    /* 斜边边长 */
+    width: 123px;
+    height: 1px;
+    background-color: #606060;
+    /* 旋转角度计算公式 */
+    transform: rotate(34deg);
+    transform-origin: top left;
+}
+
+/* 左下角文字 */
+.left {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+}
+
+/* 右上角文字 */
+.right {
+    position: absolute;
+    right: 2px;
+    top: 2px;
+}
+
+midi-player {
+    margin: 0px;
+    margin-bottom: 0;
+}
+
+midi-player::part(control-panel) {
+    /* background: #252a34; */
+    border: 2px solid #000;
+    border-radius: 10px 10px 0 0;
+}
+
+midi-player::part(play-button) {
+    color: #222;
+    border: 2px solid currentColor;
+    background-color: #ddd;
+    border-radius: 20px;
+    transition: all 0.2s;
+    content: "hello";
+}
+
+midi-player::part(play-button):hover {
+    color: #000;
+    background-color: #fff;
+    border-radius: 10px;
+}
+
+midi-player::part(time) {
+    font-family: monospace;
+}
+
+midi-visualizer svg rect.note {
+    opacity: 0.6;
+    stroke-width: 2;
+}
+
+midi-visualizer svg rect.note[data-instrument="0"] {
+    fill: #e03c34;
+}
+
+midi-visualizer svg rect.note[data-instrument="1"] {
+    fill: #1c71d8;
+}
+
+midi-visualizer .piano-roll-visualizer svg {
+    background: linear-gradient(90deg, #aaa 1px, transparent 1px 20px, rgba(170, 170, 170, 0.3333333333) 21px, transparent 21px 40px, rgba(170, 170, 170, 0.3333333333) 41px, transparent 41px 60px, rgba(170, 170, 170, 0.3333333333) 61px, transparent 61px) left/80px repeat;
+}
+
+midi-visualizer svg rect.note.active {
+    opacity: 0.9;
+    stroke: #000;
+}
