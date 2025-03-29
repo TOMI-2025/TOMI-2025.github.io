@@ -15,8 +15,7 @@ layout: home
     <script src="{{ '/assets/js/audio_playback.js' | relative_url }}"></script>
 </head>
 
-This is the demo page for the paper: _TOMI: Transforming and Organizing Music Ideas for Multi-Track Electronic 
-Music Compositions with Full-Song Structure_. We propose the TOMI (Transforming and Organizing Music Ideas) paradigm for high-level music data representation. 
+This is the demo page for the paper: _TOMI: Transforming and Organizing Music Ideas for Multi-Track Compositions with Full-Song Structure_. We propose the TOMI (Transforming and Organizing Music Ideas) paradigm for high-level music data representation. 
 TOMI models a musical piece as a sparse, four-dimensional space defined by **clips** (short audio or MIDI segments), 
 **sections** (temporal positions), **tracks** (instrument layers), and **transformations** (elaboration methods). 
 Based on this, we achieve the first electronic music generation system 
