@@ -289,7 +289,7 @@ We define 4 **tonalities** (C major / A minor, F major / D minor, G major / E mi
             <th class="table_col">MusicGen</th>
             <th class="table_col">Standalone LLM</th>
             <th class="table_col">Random</th>
-            <th class="table_col">\( e \)TOMI</th>
+            <th class="table_col">TOMI</th>
         </tr>
     </thead>
     <tbody>
@@ -362,7 +362,7 @@ We define 4 **tonalities** (C major / A minor, F major / D minor, G major / E mi
             <th class="table_col">MusicGen</th>
             <th class="table_col">Standalone LLM</th>
             <th class="table_col">Random</th>
-            <th class="table_col">\( e \)TOMI</th>
+            <th class="table_col">TOMI</th>
         </tr>
     </thead>
     <tbody>
@@ -435,7 +435,7 @@ We define 4 **tonalities** (C major / A minor, F major / D minor, G major / E mi
             <th class="table_col">MusicGen</th>
             <th class="table_col">Standalone LLM</th>
             <th class="table_col">Random</th>
-            <th class="table_col">\( e \)TOMI</th>
+            <th class="table_col">TOMI</th>
         </tr>
     </thead>
     <tbody>
@@ -508,7 +508,7 @@ We define 4 **tonalities** (C major / A minor, F major / D minor, G major / E mi
             <th class="table_col">MusicGen</th>
             <th class="table_col">Standalone LLM</th>
             <th class="table_col">Random</th>
-            <th class="table_col">\( e \)TOMI</th>
+            <th class="table_col">TOMI</th>
         </tr>
     </thead>
     <tbody>
