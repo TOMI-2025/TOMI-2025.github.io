@@ -74,13 +74,11 @@ function stopPlaying() {
 }
 
 function createSampleWaveSurferCell(parent, audioUrl, desc) {
-    // 生成唯一 ID
     console.log(audioUrl)
     let audio_identifier = audioUrl.split('/')[2].split('.')[0]
     const waveId = `waveform_${audio_identifier}`;
     const btnId = `play_btn_${audio_identifier}`;
 
-    // 创建按钮和波形容器
     parent.innerHTML = `
         ${desc}
         <div class="audio_wrapper">
@@ -88,7 +86,7 @@ function createSampleWaveSurferCell(parent, audioUrl, desc) {
             <div id="${waveId}" class="waveform"></div>
         </div>
     `;
-    // 初始化 Wavesurfer
+
     const wavesurfer = WaveSurfer.create({
         container: `#${waveId}`,
         waveColor: '#B1B1B1',
@@ -111,7 +109,7 @@ function createSampleWaveSurferCell(parent, audioUrl, desc) {
         ],
     });
     let btnEle = document.getElementById(btnId)
-    // 绑定播放按钮事件
+
     btnEle.addEventListener("click", function () {
         if (btnEle.textContent === "▶") {
             stopPlaying();
@@ -127,14 +125,13 @@ function createSampleWaveSurferCell(parent, audioUrl, desc) {
 }
 
 function createWaveSurferCell(parent, audioUrl, pattern) {
-    // 生成唯一 ID
+
     let audio_seg = audioUrl.split("/")
     let name_seg = audio_seg[3].split(".")[0].split("_")
     let audio_identifier = audio_seg[1] + name_seg[0] + name_seg[1][0] + name_seg[2]
     const waveId = `waveform_${audio_identifier}`;
     const btnId = `play_btn_${audio_identifier}`;
 
-    // 创建按钮和波形容器
     parent.innerHTML = `
         <div class="audio_wrapper">
             <button id="${btnId}" class="play_btn">▶</button>
@@ -142,7 +139,7 @@ function createWaveSurferCell(parent, audioUrl, pattern) {
         </div>
     `;
     const regions = WaveSurfer.Regions.create()
-    // 初始化 Wavesurfer
+
     const wavesurfer = WaveSurfer.create({
         container: `#${waveId}`,
         waveColor: '#B1B1B1',
@@ -178,7 +175,7 @@ function createWaveSurferCell(parent, audioUrl, pattern) {
         });
     })
     let btnEle = document.getElementById(btnId)
-    // 绑定播放按钮事件
+
     btnEle.addEventListener("click", function () {
         if (btnEle.textContent === "▶") {
             stopPlaying();
@@ -203,9 +200,8 @@ function syncVisualizerWidth() {
     });
 }
 
-// 初始化同步
+
 window.addEventListener("load", syncVisualizerWidth);
-// 监听窗口变化
 window.addEventListener("resize", syncVisualizerWidth);
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -214,7 +210,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const p2 = document.getElementById("table_pattern2");
     const p3 = document.getElementById("table_pattern3");
     const p4 = document.getElementById("table_pattern4");
-    // 遍历所有带有 data-audio-src 的 <td>
     demo.querySelectorAll("td[data-audio-src]").forEach((cell) => {
         const audioUrl = cell.getAttribute("data-audio-src");
         const desc = cell.getAttribute('desc')

@@ -33,7 +33,6 @@ In this page, we demonstrate the TOMI data structure with examples, then we show
 ## Demo and Analysis
 In this part, let's first see an example of music segment showing on a digital audio workstation (DAW) software:
 
-[//]: # (After assigning tracks to the above transformed clips, we can achieve the same music representation on a digital audio workstation:)
 <div class="center-stuff"><img src="/assets/pics/daw_representation.jpg" style="width:1000px" alt=""></div>
 
 Through this representation, we can see the music is arranged on a canvas with the **timeline** as X-axis and **tracks** as Y-axis. Note that we put a 
@@ -182,8 +181,7 @@ Details are shown in the table below.
                 }),
             ],
         });
-        let btnEle = document.getElementById("play_btn_full_demo")
-        // 绑定播放按钮事件
+        let btnEle = document.getElementById("play_btn_full_demo");
         btnEle.addEventListener("click", function () {
             if (btnEle.textContent === "▶") {
                 stopPlaying();
@@ -205,13 +203,54 @@ Thanks <a href="https://cifkao.github.io/html-midi-player/">html-midi-player</a>
 In this video, we demonstrate the process of translating a TOMI-based composition directly within the REAPER digital audio workstation, which offers comprehensive ReaScript APIs that allow for easy control through custom scripts.
 Next, we demonstrate the user co-creation capability by manually adjusting virtual instruments and mixing parameters in REAPER. The full composition is played at the end of the video.
 
-[//]: # (<div class="center-stuff">)
+<div class="center-stuff">
+    <video controls width="800" src="tomi_demo.mp4"></video>
+</div>
 
-[//]: # (    <video controls width="800" src="demo.mp4"></video>)
+The full music audio from the video:
 
-[//]: # (</div>)
+<div class="audio_wrapper">
+<button id="play_btn_video_demo" class="play_btn">▶</button>
+<div id="waveform_video_demo" class="waveform"></div>
+</div>
 
-[//]: # (<br>)
+<script>
+    const wavesurfer2 = WaveSurfer.create({
+        container: `#waveform_video_demo`,
+        waveColor: '#B1B1B1',
+        progressColor: '#F6B094',
+        barWidth: 2,
+        interact: true,
+        pixelRatio: 1,
+        height: 40,
+        cursorWidth: 2,
+        cursorColor: "red",
+        url: "/audio/tomi_demos/tomi_pattern3_C.mp3",
+        plugins: [
+            WaveSurfer.Hover.create({
+                lineColor: '#ff0000',
+                lineWidth: 2,
+                labelBackground: '#555',
+                labelColor: '#fff',
+                labelSize: '11px',
+            }),
+        ],
+    });
+    let btnEle2 = document.getElementById("play_btn_video_demo");
+    btnEle2.addEventListener("click", function () {
+        if (btnEle2.textContent === "▶") {
+            stopPlaying();
+            btnEle2.textContent = '◼';
+            wavesurfer2.play();
+            currentPlayingAudio = wavesurfer2;
+            currentPlayingBtn = btnEle2;
+        } else {
+            stopPlaying();
+        }
+    });
+</script>
+
+<br>
 
 ---
 ## More examples with comparison
