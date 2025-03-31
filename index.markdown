@@ -204,9 +204,7 @@ In this video, we demonstrate the process of translating a TOMI-based compositio
 Next, we demonstrate the user co-creation capability by manually adjusting virtual instruments and mixing parameters in REAPER. The full composition is played at the end of the video.
 
 <div class="center-stuff">
-    <video controls width="800">
-        <source src="video/myvideo.m3u8" type="application/x-mpegURL">
-    </video>
+    <video controls preload="metadata" width="800" src="tomi_demo.mp4"></video>
 </div>
 
 Here is the full music audio from the video:
