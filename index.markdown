@@ -204,51 +204,14 @@ In this video, we demonstrate the process of translating a TOMI-based compositio
 Next, we demonstrate the user co-creation capability by manually adjusting virtual instruments and mixing parameters in REAPER. The full composition is played at the end of the video.
 
 <div class="center-stuff">
-    <video controls width="800" src="tomi_demo.mp4"></video>
+    <video controls width="800">
+        <source src="video/myvideo.m3u8" type="application/x-mpegURL">
+    </video>
 </div>
 
-The full music audio from the video:
+Here is the full music audio from the video:
 
-<div class="audio_wrapper">
-<button id="play_btn_video_demo" class="play_btn">▶</button>
-<div id="waveform_video_demo" class="waveform"></div>
-</div>
-
-<script>
-    const wavesurfer2 = WaveSurfer.create({
-        container: `#waveform_video_demo`,
-        waveColor: '#B1B1B1',
-        progressColor: '#F6B094',
-        barWidth: 2,
-        interact: true,
-        pixelRatio: 1,
-        height: 40,
-        cursorWidth: 2,
-        cursorColor: "red",
-        url: "/audio/tomi_demos/tomi_pattern3_C.mp3",
-        plugins: [
-            WaveSurfer.Hover.create({
-                lineColor: '#ff0000',
-                lineWidth: 2,
-                labelBackground: '#555',
-                labelColor: '#fff',
-                labelSize: '11px',
-            }),
-        ],
-    });
-    let btnEle2 = document.getElementById("play_btn_video_demo");
-    btnEle2.addEventListener("click", function () {
-        if (btnEle2.textContent === "▶") {
-            stopPlaying();
-            btnEle2.textContent = '◼';
-            wavesurfer2.play();
-            currentPlayingAudio = wavesurfer2;
-            currentPlayingBtn = btnEle2;
-        } else {
-            stopPlaying();
-        }
-    });
-</script>
+<div id="tomi_vda" data-audio-src="audio/tomi_demos/tomi_pattern3_C.mp3" data-pattern="pattern3_special"></div>
 
 <br>
 

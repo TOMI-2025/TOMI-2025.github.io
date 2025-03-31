@@ -43,7 +43,19 @@ const sectionPatterns = {
         ["p", "PreChorus", 4],
         ["c", "Chorus", 8],
         ["o", "Outro", 8]
-    ]
+    ],
+    pattern3_special: [
+        ["i", "Intro", 8],
+        ["v1", "Verse1", 16],
+        ["p1", "PreChorus1", 8],
+        ["c1", "Chorus1", 16],
+        ["v2", "Verse2", 16],
+        ["p2", "PreChorus2", 8],
+        ["c2", "Chorus2", 16],
+        ["b", "Bridge", 8],
+        ["c3", "Chorus3", 16],
+        ["o", "Outro", 8]
+    ],
 };
 
 const random = (min, max) => Math.random() * (max - min) + min
@@ -74,7 +86,7 @@ function stopPlaying() {
 }
 
 function createSampleWaveSurferCell(parent, audioUrl, desc) {
-    console.log(audioUrl)
+    // console.log(audioUrl)
     let audio_identifier = audioUrl.split('/')[2].split('.')[0]
     const waveId = `waveform_${audio_identifier}`;
     const btnId = `play_btn_${audio_identifier}`;
@@ -125,7 +137,6 @@ function createSampleWaveSurferCell(parent, audioUrl, desc) {
 }
 
 function createWaveSurferCell(parent, audioUrl, pattern) {
-
     let audio_seg = audioUrl.split("/")
     let name_seg = audio_seg[3].split(".")[0].split("_")
     let audio_identifier = audio_seg[1] + name_seg[0] + name_seg[1][0] + name_seg[2]
@@ -190,6 +201,68 @@ function createWaveSurferCell(parent, audioUrl, pattern) {
     return wavesurfer;
 }
 
+function createVideoDemoAudio(parent, audioUrl, pattern) {
+    const waveId = `waveform_tomi_video_demo_audio`;
+    const btnId = `play_btn_tomi_video_demo_audio`;
+
+    parent.innerHTML = `
+        <div class="audio_wrapper">
+            <button id="${btnId}" class="play_btn">▶</button>
+            <div id="${waveId}" class="waveform"></div>
+        </div>
+    `;
+    const regions = WaveSurfer.Regions.create()
+
+    const wavesurfer = WaveSurfer.create({
+        container: `#${waveId}`,
+        waveColor: '#B1B1B1',
+        progressColor: '#F6B094',
+        barWidth: 2,
+        interact: true,
+        pixelRatio: 1,
+        height: 40,
+        cursorWidth: 2,
+        cursorColor: "red",
+        url: audioUrl,
+        plugins: [
+            WaveSurfer.Hover.create({
+                lineColor: '#ff0000',
+                lineWidth: 2,
+                labelBackground: '#555',
+                labelColor: '#fff',
+                labelSize: '11px',
+            }),
+            regions
+        ],
+    });
+    wavesurfer.on('decode', () => {
+        let r_start = 0
+        sectionPatterns[pattern].forEach(section => {
+            regions.addRegion({
+                start: r_start,
+                // end: r_start + bars2sec(section[2]),
+                content: section[1],
+                color: randomColors[section[1]],
+            })
+            r_start += bars2sec(section[2])
+        });
+    })
+    let btnEle = document.getElementById(btnId)
+
+    btnEle.addEventListener("click", function () {
+        if (btnEle.textContent === "▶") {
+            stopPlaying();
+            btnEle.textContent = '◼';
+            wavesurfer.play();
+            currentPlayingAudio = wavesurfer;
+            currentPlayingBtn = btnEle;
+        } else {
+            stopPlaying();
+        }
+    });
+    return wavesurfer;
+}
+
 function syncVisualizerWidth() {
     const players = document.querySelectorAll("midi-player");
     players.forEach(player => {
@@ -200,16 +273,19 @@ function syncVisualizerWidth() {
     });
 }
 
-
 window.addEventListener("load", syncVisualizerWidth);
 window.addEventListener("resize", syncVisualizerWidth);
 
 document.addEventListener("DOMContentLoaded", function () {
     const demo = document.getElementById("demo_table")
+    const video_demo = document.getElementById("tomi_vda")
     const p1 = document.getElementById("table_pattern1");
     const p2 = document.getElementById("table_pattern2");
     const p3 = document.getElementById("table_pattern3");
     const p4 = document.getElementById("table_pattern4");
+    const audioUrl = video_demo.getAttribute("data-audio-src");
+    const pattern = video_demo.getAttribute("data-pattern");
+    createVideoDemoAudio(video_demo, audioUrl, pattern);
     demo.querySelectorAll("td[data-audio-src]").forEach((cell) => {
         const audioUrl = cell.getAttribute("data-audio-src");
         const desc = cell.getAttribute('desc')
