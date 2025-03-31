@@ -45,16 +45,16 @@ const sectionPatterns = {
         ["o", "Outro", 8]
     ],
     pattern3_special: [
-        ["i", "Intro", 8],
-        ["v1", "Verse1", 16],
-        ["p1", "PreChorus1", 8],
-        ["c1", "Chorus1", 16],
-        ["v2", "Verse2", 16],
-        ["p2", "PreChorus2", 8],
-        ["c2", "Chorus2", 16],
-        ["b", "Bridge", 8],
-        ["c3", "Chorus3", 16],
-        ["o", "Outro", 8]
+        ["Intro", "Intro", 8],
+        ["Verse1", "Verse", 16],
+        ["PreChorus1", "PreChorus", 8],
+        ["Chorus1", "Chorus", 16],
+        ["Verse2", "Verse", 16],
+        ["PreChorus2", "PreChorus", 8],
+        ["Chorus2", "Chorus", 16],
+        ["Bridge", "Bridge", 8],
+        ["Chorus3", "Chorus", 16],
+        ["Outro", "Outro", 8]
     ],
 };
 
@@ -241,7 +241,7 @@ function createVideoDemoAudio(parent, audioUrl, pattern) {
             regions.addRegion({
                 start: r_start,
                 // end: r_start + bars2sec(section[2]),
-                content: section[1],
+                content: section[0],
                 color: randomColors[section[1]],
             })
             r_start += bars2sec(section[2])
