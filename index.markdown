@@ -181,6 +181,13 @@ Details are shown in the table below.
                 }),
             ],
         });
+        wavesurfer.on('finish', () => {
+                if (currentPlayingAudio !== null) {
+                    currentPlayingBtn.textContent = '▶'
+                }
+                currentPlayingAudio = null;
+                currentPlayingBtn = null;
+            });
         let btnEle = document.getElementById("play_btn_full_demo");
         btnEle.addEventListener("click", function () {
             if (btnEle.textContent === "▶") {
@@ -221,12 +228,49 @@ We limit all generated sections to the 4/4 time signature to simplify implementa
 When exporting audio via REAPER, we randomly assign each MIDI track to one of eight virtual instrument presets (5 for chords, 2 for melody, and 1 for bass). 
 We keep all REAPER settings at their defaults and apply no mixing plug-ins except for a limiter on the master track to prevent audio clipping.
 
+**TOMI:**
+In our implementation, we design our prompt for in-context-learning in the following structure:
+
+> **Role Assignment:**  
+> You are a professional music producer using a framework called TOMI to make music.
+>
+> **Detailed Explanation of TOMI Data Structure:**
+>
+>   1. **Sections**
+>      - Explanation: ...
+>      - Attributes: ...
+>      - Examples: ...
+>   2. **Tracks**
+>      - Explanation: ...
+>      - Attributes: ...
+>      - Examples: ...
+>   3. **Clips**
+>      - Explanation: ...
+>      - Attributes: ...
+>      - Examples: ...
+>   4. **Transformations**
+>      - Explanation: ...
+>      - Attributes: ...
+>      - Examples: ...
+>   5. **Composition Links**
+>      - Explanation: ...
+>      - Examples: ...
+>
+> **Instructions:**
+>   - **a)** Generate a composition as JSON format with keys following the order: "Sections", "Tracks", "Clips", "Transformations", and "Composition Links".
+>   - **b)** Do not generate duplicated nodes or composition links.
+>   - **c)** Use only previously generated node names in your composition links.
+>
+> **Additional Context:**  
+> Please compose an electronic music piece. Feel free to choose any instruments you like on your own. The tempo is about 120, and the mood is happy. Your generation should be completely provided, and should be close to real-world music production.
+
+
 **MusicGen:**
 We use MusicGen-Large-3.3B model as the baseline, with prompts that specify tonality, tempo, and song structure. It helps to evaluate our approach against state-of-the-art music generation systems. Given MusicGen's 30-second generation limit, we implement a sliding window approach to generate longer audio by using a fixed 30-second window that slides in 10-second chunks, while using the previous generated 20 seconds as context. To enable structural awareness during generation, we modify the model's inference process by appending explicit structure context after the initial text prompt at each generation step, instructing the model to align its output with the given structure. A prompt example is as follows:
 
->Full prompt of one generation step:\
->(1) Initial Prompt: Generate an electronic track at 120 BPM in C major. Follow this structure: 8-bar intro, 16-bar verse, 8-bar pre-chorus, 16-bar chorus…\
->(2) Structure Context: For now, you are generating the segment between the 120th second and the 150th second, which corresponds to the the 60th bar and the 75th bar regarding the whole song, your generated segment includes 4 bars of PreChorus, 8 bars of Chorus, and 3 bars of Outro of the song structure.
+>An example of a full prompt used in one generation step:\
+>(1) **Initial Prompt**: Generate an electronic music track at 120 BPM in C major. Follow this structure: 8-bar intro, 16-bar verse, 8-bar pre-chorus, 16-bar chorus…\
+>(2) **Structure Context**: For now, you are generating the segment between the 120th second and the 150th second, which corresponds to the the 60th bar and the 75th bar regarding the whole song, your generated segment includes 4 bars of PreChorus, 8 bars of Chorus, and 3 bars of Outro of the song structure.
 
 **Standalone LLM (TOMI w/o Composition Links):**
 This ablation uses the same GPT-4o model but without composition links representation. It helps to evaluate the impacts of our composition links representation on generation quality. We design the prompt to let the LLM generate a sequence of tracks and clip descriptions with position information (time point and track location) conditioned on a song structure, and then the content retrieval mechanism is also applied for the clips; lastly, we convert the generated output to a REAPER arrangement for audio rendering.
@@ -236,6 +280,8 @@ To assess the contribution of LLM-based generation, we replace the LLM operation
 
 #### **Generation Results**
 We define 4 **tonalities** (C major / A minor, F major / D minor, G major / E minor and B$$\flat$$ major / G minor) and 4 distinct **section sequence**, each comprising a sequence of section names with phrase labels and bar durations. Sections with the same name and phrase label should be identical (eg. $$\text{pre-chorus}$$ and $$\text{pre-chorus}$$), while those with different names but the same phrase label should be similar (eg. $$\text{verse 1}$$ and $$\text{verse 2}$$). Then, we generate four sets of electronic music compositions of 120 BPM for each method, with each set containing 8 compositions generated under the same section sequence and 4 different tonalities (2 compositions for each key).
+\\
+In total, we generate 128 compositions (32 for each section sequence). The audio is used in our objective and subjective evaluations, as discussed in the paper.
 
 ##### <center> \( \textbf{Structure 1: } \) \( \text{intro(8b)} \) \( \rightarrow \) \( \text{verse 1(16b)} \) \( \rightarrow \) \( \text{pre-chorus(8b)} \) \( \rightarrow \) \( \text{chorus 1(16b)} \) \( \rightarrow \) \( \text{verse 2(16b)} \) \( \rightarrow \) \( \text{pre-chorus(8b)} \) \( \rightarrow \) \( \text{chorus 2(16b)} \) \( \rightarrow \) \( \text{bridge(8b)} \) \( \rightarrow \) \( \text{chorus 3(16b)} \) \( \rightarrow \) \( \text{outro(8b)} \)
 <div class="center-stuff">

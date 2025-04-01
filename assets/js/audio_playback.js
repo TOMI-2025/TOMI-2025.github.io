@@ -120,6 +120,13 @@ function createSampleWaveSurferCell(parent, audioUrl, desc) {
             }),
         ],
     });
+    wavesurfer.on('finish', () => {
+        if (currentPlayingAudio !== null) {
+            currentPlayingBtn.textContent = '▶'
+        }
+        currentPlayingAudio = null;
+        currentPlayingBtn = null;
+    })
     let btnEle = document.getElementById(btnId)
 
     btnEle.addEventListener("click", function () {
@@ -185,6 +192,13 @@ function createWaveSurferCell(parent, audioUrl, pattern) {
             r_start += bars2sec(section[2])
         });
     })
+    wavesurfer.on('finish', () => {
+        if (currentPlayingAudio !== null) {
+            currentPlayingBtn.textContent = '▶'
+        }
+        currentPlayingAudio = null;
+        currentPlayingBtn = null;
+    })
     let btnEle = document.getElementById(btnId)
 
     btnEle.addEventListener("click", function () {
@@ -247,6 +261,14 @@ function createVideoDemoAudio(parent, audioUrl, pattern) {
             r_start += bars2sec(section[2])
         });
     })
+    wavesurfer.on('finish', () => {
+        if (currentPlayingAudio !== null) {
+            currentPlayingBtn.textContent = '▶'
+        }
+        currentPlayingAudio = null;
+        currentPlayingBtn = null;
+    })
+
     let btnEle = document.getElementById(btnId)
 
     btnEle.addEventListener("click", function () {
