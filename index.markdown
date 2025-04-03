@@ -20,16 +20,23 @@ TOMI models a musical piece as a sparse, four-dimensional space defined by **cli
 **sections** (temporal positions), **tracks** (instrument layers), and **transformations** (elaboration methods). 
 Based on this, we achieve the first electronic music generation system 
 to produce long-term, multi-track compositions containing both MIDI and audio clips, while achieving **robust structural consistency** and **high music quality**. We use 
-a foundation large language model (LLM) with TOMI data structure and achieve high level full-song electronic music orchestration through **in-context-learning** (ICL) and sample retrieval. 
+a foundation text-based large language model (LLM) with TOMI data structure and achieve multi-track electronic music generation with full-song structure through **in-context-learning** (ICL) and sample retrieval. 
 Moreover, we integrate
 TOMI with the REAPER digital audio workstation (DAW) to provide an interactive workflow and exports audio of high-resolution. 
-In this page, we demonstrate the TOMI data structure with examples, then we show a video demo of DAW integration, and lastly we show multiple generated audio demos.
+
+
+Here is the outline of this page:
+
+1. [**Demo and Analysis**] (#demo-and-analysis)
+2. [**Digital Audio Workstation Integration**] (#digital-audio-workstation-integration) (Video demo)
+3. [**More Examples with Comparison**] (#more-examples-with-comparison) (All Audios used in our experiments)
 
 <div class="center-stuff"><img src="/assets/pics/tomi_structure.jpg" style="width:600px" alt=""></div>
 <p align="center"><strong>Concept hierarchy in TOMI</strong>: <em>music ideas</em>, which are developed from features into music clips, are transformed and integrated into the <em>final composition</em> organized by sections and tracks.</p>
 
 
 ---
+<a id="demo-and-analysis"></a>
 ## Demo and Analysis
 In this part, let's first see an example of music segment showing on a digital audio workstation (DAW) software:
 
@@ -51,15 +58,12 @@ Let's have a listen to this section (8-bar) at 120BPM and 4/4 time signature:
 
 \\
 Now, let's break down this piece and see how the data can be represented in TOMI data structure, we show the examples of applying transformations on raw clips in an **8-bar section**. 
-\\
 In our implementation, we define 3 subclasses of transformations to handle different scenarios: (1) **Drum Transform** for one-shot drums, (2) **Fx Transform** for riser and faller sound effects, and (3) **General Transform** for other cases.
-\\
 We use an _**action sequence**_ in transformations to control the rhythmic pattern, looping, and placement of clips within sections.
 In _**action sequence**_ of **General Transform** and **Drum Transform**, we use "►" to denote the _**onset**_ state, "=" to 
 denote the _**sustain**_ state, and "-" to denote the _**rest**_ state. Each state corresponds to an action 
 at a step time within the section (eg. a bar has 16 steps in the 4/4 time signature). The _**onset**_ state means the clip will 
 be replayed at this time, _**rest**_ means the clip will stop playing, and _**sustain**_ means to continue playing.
-\\
 For **Fx Transform**, it is designed for riser and faller sound effects, so it only needs a _**placement**_ parameter to specify whether the 
 clips are placed left- or right-aligned within sections. Then, its _**action sequence**_ is dynamically computed in the backend for each composition link.
 
@@ -206,6 +210,7 @@ Details are shown in the table below.
 Thanks <a href="https://cifkao.github.io/html-midi-player/">html-midi-player</a> for the excellent MIDI visualization.
 
 ---
+<a id="digital-audio-workstation-integration"></a>
 ## Digital Audio Workstation Integration
 In this video, we demonstrate the process of translating a TOMI-based composition directly within the REAPER digital audio workstation, which offers comprehensive ReaScript APIs that allow for easy control through custom scripts.
 Next, we demonstrate the user co-creation capability by manually adjusting virtual instruments and mixing parameters in REAPER. The full composition is played at the end of the video.
@@ -221,67 +226,12 @@ Here is the full music audio from the video:
 <br>
 
 ---
-## More examples with comparison
-We prepare a MIDI database and an audio database for clip sample retrieval and use GPT-4o to generate compositions in TOMI schema.
-We compare our method with MusicGen and two ablations in electronic music generation. 
-We limit all generated sections to the 4/4 time signature to simplify implementation. 
-When exporting audio via REAPER, we randomly assign each MIDI track to one of eight virtual instrument presets (5 for chords, 2 for melody, and 1 for bass). 
-We keep all REAPER settings at their defaults and apply no mixing plug-ins except for a limiter on the master track to prevent audio clipping.
-
-**TOMI:**
-In our implementation, we design our prompt for in-context-learning in the following structure:
-
-> **Role Assignment:**  
-> You are a professional music producer using a framework called TOMI to make music.
->
-> **Detailed Explanation of TOMI Data Structure:**
->
->   1. **Sections**
->      - Explanation: ...
->      - Attributes: ...
->      - Examples: ...
->   2. **Tracks**
->      - Explanation: ...
->      - Attributes: ...
->      - Examples: ...
->   3. **Clips**
->      - Explanation: ...
->      - Attributes: ...
->      - Examples: ...
->   4. **Transformations**
->      - Explanation: ...
->      - Attributes: ...
->      - Examples: ...
->   5. **Composition Links**
->      - Explanation: ...
->      - Examples: ...
->
-> **Instructions:**
->   - **a)** Generate a composition as JSON format with keys following the order: "Sections", "Tracks", "Clips", "Transformations", and "Composition Links".
->   - **b)** Do not generate duplicated nodes or composition links.
->   - **c)** Use only previously generated node names in your composition links.
->
-> **Additional Context:**  
-> Please compose an electronic music piece. Feel free to choose any instruments you like on your own. The tempo is about 120, and the mood is happy. Your generation should be completely provided, and should be close to real-world music production.
-
-
-**MusicGen:**
-We use MusicGen-Large-3.3B model as the baseline, with prompts that specify tonality, tempo, and song structure. It helps to evaluate our approach against state-of-the-art music generation systems. Given MusicGen's 30-second generation limit, we implement a sliding window approach to generate longer audio by using a fixed 30-second window that slides in 10-second chunks, while using the previous generated 20 seconds as context. To enable structural awareness during generation, we modify the model's inference process by appending explicit structure context after the initial text prompt at each generation step, instructing the model to align its output with the given structure. A prompt example is as follows:
-
->An example of a full prompt used in one generation step:\
->(1) **Initial Prompt**: Generate an electronic music track at 120 BPM in C major. Follow this structure: 8-bar intro, 16-bar verse, 8-bar pre-chorus, 16-bar chorus…\
->(2) **Structure Context**: For now, you are generating the segment between the 120th second and the 150th second, which corresponds to the the 60th bar and the 75th bar regarding the whole song, your generated segment includes 4 bars of PreChorus, 8 bars of Chorus, and 3 bars of Outro of the song structure.
-
-**Standalone LLM (TOMI w/o Composition Links):**
-This ablation uses the same GPT-4o model but without composition links representation. It helps to evaluate the impacts of our composition links representation on generation quality. We design the prompt to let the LLM generate a sequence of tracks and clip descriptions with position information (time point and track location) conditioned on a song structure, and then the content retrieval mechanism is also applied for the clips; lastly, we convert the generated output to a REAPER arrangement for audio rendering.
-
-**Random (TOMI w/o LLM):**
-To assess the contribution of LLM-based generation, we replace the LLM operations in our system with a rule-based method that uses randomized operations to generate music within the composition-links structure. This method first creates a random number (15-25) of track nodes, then populates sections with clips based on stochastic decisions. For each track on each unique section, the system determines clip placement through a two-step random process: first deciding whether to place a clip, if so, then choosing between reusing an existing clip or generating a new one. For each MIDI clip, the content type is randomly assigned one of three types (chord, bass, or melody), with bass clips comprise root notes derived from existing chord clips to maintain coherence. The generation of audio clips involves random selection from a predefined set of feature tags, which cover tonal elements, percussion, and sound effects. The final step links one of four predefined transformation nodes to each clip based on the clip's content type or audio features.
-
-#### **Generation Results**
-We define 4 **tonalities** (C major / A minor, F major / D minor, G major / E minor and B$$\flat$$ major / G minor) and 4 distinct **section sequence**, each comprising a sequence of section names with phrase labels and bar durations. Sections with the same name and phrase label should be identical (eg. $$\text{pre-chorus}$$ and $$\text{pre-chorus}$$), while those with different names but the same phrase label should be similar (eg. $$\text{verse 1}$$ and $$\text{verse 2}$$). Then, we generate four sets of electronic music compositions of 120 BPM for each method, with each set containing 8 compositions generated under the same section sequence and 4 different tonalities (2 compositions for each key).
-\\
-In total, we generate 128 compositions (32 for each section sequence). The audio is used in our objective and subjective evaluations, as discussed in the paper.
+<a id="more-examples-with-comparison"></a>
+## More Examples with Comparison
+We prepare a MIDI database and an audio database for clip sample retrieval and use GPT-4o to generate compositions in the TOMI schema.
+We compare our method with a baseline method and two ablations in electronic music generation, including **MusicGen**, **Standalone LLM (TOMI w/o Composition Links)**, and **Random (TOMI w/o LLM)**, as discussed in our paper.
+This section presents all 128 compositions used in our experiments, with 32 compositions for each of the 4 section sequences.
+The prompt structures are provided at the end of this section.
 
 ##### <center> \( \textbf{Structure 1: } \) \( \text{intro(8b)} \) \( \rightarrow \) \( \text{verse 1(16b)} \) \( \rightarrow \) \( \text{pre-chorus(8b)} \) \( \rightarrow \) \( \text{chorus 1(16b)} \) \( \rightarrow \) \( \text{verse 2(16b)} \) \( \rightarrow \) \( \text{pre-chorus(8b)} \) \( \rightarrow \) \( \text{chorus 2(16b)} \) \( \rightarrow \) \( \text{bridge(8b)} \) \( \rightarrow \) \( \text{chorus 3(16b)} \) \( \rightarrow \) \( \text{outro(8b)} \)
 <div class="center-stuff">
@@ -574,4 +524,49 @@ In total, we generate 128 compositions (32 for each section sequence). The audio
     </tbody>
 </table>
 </div>
+
+**TOMI Prompt Structure:**
+In our implementation, we design our prompt for in-context-learning in the following structure:
+
+> **Role Assignment:**  
+> You are a professional music producer using a framework called TOMI to make music.
+>
+> **Detailed Explanation of TOMI Data Structure:**
+>
+>   1. **Sections**
+>      - Explanation: ...
+>      - Attributes: ...
+>      - Examples: ...
+>   2. **Tracks**
+>      - Explanation: ...
+>      - Attributes: ...
+>      - Examples: ...
+>   3. **Clips**
+>      - Explanation: ...
+>      - Attributes: ...
+>      - Examples: ...
+>   4. **Transformations**
+>      - Explanation: ...
+>      - Attributes: ...
+>      - Examples: ...
+>   5. **Composition Links**
+>      - Explanation: ...
+>      - Examples: ...
+>
+> **Instructions:**
+>   - **a)** Generate a composition as JSON format with keys following the order: "Sections", "Tracks", "Clips", "Transformations", and "Composition Links".
+>   - **b)** Do not generate duplicated nodes or composition links.
+>   - **c)** Use only previously generated node names in your composition links.
+>
+> **Additional Context:**  
+> Please compose an electronic music piece. Feel free to choose any instruments you like on your own. The tempo is about 120, and the mood is happy. Your generation should be completely provided, and should be close to real-world music production.
+
+
+**MusicGen Prompt Structure:**
+We use MusicGen-Large-3.3B model as the baseline, with prompts that specify tonality, tempo, and song structure. To enable structural awareness during generation, we modify the model's inference process by adding explicit structure context after the initial text prompt in each generation step, instructing the model to align its output with the given structure. The "_Structure Context_" part is replaced in each generation step. A prompt example is as follows:
+
+>An example of a full prompt used in one generation step:\
+>(1) **Initial Prompt**: Generate an electronic music track at 120 BPM in C major. Follow this structure: 8-bar intro, 16-bar verse, 8-bar pre-chorus, 16-bar chorus…\
+>(2) **Structure Context**: For now, you are generating the segment between the 120th second and the 150th second, which corresponds to the the 60th bar and the 75th bar regarding the whole song, your generated segment includes 4 bars of PreChorus, 8 bars of Chorus, and 3 bars of Outro of the song structure.
+
 <br>
