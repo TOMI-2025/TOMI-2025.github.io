@@ -27,9 +27,9 @@ TOMI with the REAPER digital audio workstation (DAW) to provide an interactive w
 
 Here is the outline of this page:
 
-1. [**Demo and Analysis**] (#demo-and-analysis)
-2. [**Digital Audio Workstation Integration**] (#digital-audio-workstation-integration) (Video demo)
-3. [**More Examples with Comparison**] (#more-examples-with-comparison) (All Audios used in our experiments)
+1. **Demo and Analysis**
+2. **Digital Audio Workstation Integration** (Video demo)
+3. **More Examples with Comparison** (All Audios used in our experiments)
 
 <div class="center-stuff"><img src="/assets/pics/tomi_structure.jpg" style="width:600px" alt=""></div>
 <p align="center"><strong>Concept hierarchy in TOMI</strong>: <em>music ideas</em>, which are developed from features into music clips, are transformed and integrated into the <em>final composition</em> organized by sections and tracks.</p>
