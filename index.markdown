@@ -37,7 +37,7 @@ Here is the outline of this page:
 
 ---
 <a id="demo-and-analysis"></a>
-## Demo and Analysis
+## 1. Demo and Analysis
 In this part, let's first see an example of music segment showing on a digital audio workstation (DAW) software:
 
 <div class="center-stuff"><img src="/assets/pics/daw_representation.jpg" style="width:1000px" alt=""></div>
@@ -211,7 +211,7 @@ Thanks <a href="https://cifkao.github.io/html-midi-player/">html-midi-player</a>
 
 ---
 <a id="digital-audio-workstation-integration"></a>
-## Digital Audio Workstation Integration
+## 2. Digital Audio Workstation Integration
 In this video, we demonstrate the process of translating a TOMI-based composition directly within the REAPER digital audio workstation, which offers comprehensive ReaScript APIs that allow for easy control through custom scripts.
 Next, we demonstrate the user co-creation capability by manually adjusting virtual instruments and mixing parameters in REAPER. The full composition is played at the end of the video.
 
@@ -227,7 +227,7 @@ Here is the full music audio from the video:
 
 ---
 <a id="more-examples-with-comparison"></a>
-## More Examples with Comparison
+## 3. More Examples with Comparison
 We prepare a MIDI database and an audio database for clip sample retrieval and use GPT-4o to generate compositions in the TOMI schema.
 We compare our method with a baseline method and two ablations in electronic music generation, including **MusicGen**, **Standalone LLM (TOMI w/o Composition Links)**, and **Random (TOMI w/o LLM)**, as discussed in our paper.
 This section presents all 128 compositions used in our experiments, with 32 compositions for each of the 4 section sequences.
