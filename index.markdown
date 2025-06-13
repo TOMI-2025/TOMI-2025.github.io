@@ -65,9 +65,10 @@ Let's have a listen to this section (8-bar) at 120BPM and 4/4 time signature:
 Now, let's break down this piece and see how the data can be represented in TOMI data structure, we show the examples of applying transformations on raw clips in an **8-bar section**. 
 In our implementation, we define 3 subclasses of transformations to handle different scenarios: (1) **Drum Transform** for one-shot drums, (2) **Fx Transform** for riser and faller sound effects, and (3) **General Transform** for other cases.
 We use an _**action sequence**_ in transformations to control the rhythmic pattern, looping, and placement of clips within sections.
-In _**action sequence**_ of **General Transform** and **Drum Transform**, we use "►" to denote the _**onset**_ state, "=" to 
+In _**action sequence**_, there are three state types allowed to control the rhythmic pattern of clips, we use "►" to denote the _**onset**_ state, "=" to
 denote the _**sustain**_ state, and "-" to denote the _**rest**_ state. Each state corresponds to an action 
-at a step time within the section (eg. a bar has 16 steps in the 4/4 time signature). The _**onset**_ state means the clip will 
+at a step time within the section (eg. a bar has 16 steps in the 4/4 time signature), which means all transformations are limited to 16th note patterns. 
+The _**onset**_ state means the clip will 
 be replayed at this time, _**rest**_ means the clip will stop playing, and _**sustain**_ means to continue playing.
 For **Fx Transform**, it is designed for riser and faller sound effects, so it only needs a _**placement**_ parameter to specify whether the 
 clips are placed left- or right-aligned within sections. Then, its _**action sequence**_ is dynamically computed in the backend for each composition link.
@@ -533,7 +534,7 @@ The prompt structures are provided at the end of this section.
 ---
 <a id="prompt-design"></a>
 ## 4. Prompt Design
-**TOMI Prompt Structure:**
+**TOMI Prompt:**
 Our prompt design for in-context learning is structured as follows:
 
 <pre style="text-align: left; white-space: pre-wrap; word-break: normal;">
@@ -790,10 +791,139 @@ Follow the instructions below to generate each module of TOMI:
 
 
 Additional Context (User Prompt):  
-    Please compose an electronic music piece. Feel free to choose any instruments you like on your own. The tempo is about 120, and the mood is happy. Your generation should be completely provided, and should be close to real-world music production.
+    Please compose an electronic music song. Feel free to choose any instruments you like on your own. The tempo is about 120, and the mood is happy. Your generation should be completely provided, and should be close to real-world music production.
 </pre>
 
-**MusicGen Prompt Structure:**
+**Standalone LLM (TOMI w/o Composition Links) Prompt:**
+In this ablation, we remove the composition links representation from TOMI, and redesign the prompt as follows:
+<pre style="text-align: left; white-space: pre-wrap; word-break: normal;">
+You are a professional music producer.
+To make a song step by step, first you can treat a song arrangement as a 2D canvas, where the X-axis being the timeline and Y-axis being the tracks. You will need to generate the following parts in order:
+
+## 1. Track
+Description:
+    Represents a track of the song.
+Attributes:
+    1. track_name (string): name of the track, assign an instrument/"purpose" for the track, it works just like a tag name used to help you arrange the clips clearly, the name should begin with "track_" to avoid duplicate names with clips, such as "track_piano", "track_kick";
+    2. track_type (string): "MIDI" or "Audio".
+Data Format (for one Track) (list):
+    [{track_name}, {track_type}]
+Examples:
+    E1. ["track_main_piano", "Midi"]
+    E2. ['track_kick', "Audio"]
+    E3. ['track_hihat_loop', "Audio"]
+Instruction:
+    To generate the tracks for the song, you need to generate multiple Track data and put them in a single list.
+
+## 2. Clip
+Description:
+    Represents the content on the arrangement canvas, a Clip can be either a MIDI clip or an audio clip.
+Shared Attributes:
+    1. clip_name (string): name of the clip, should begin with "clip_";
+    2. clip_type (string): "MIDI" for MIDI Clips and "Audio" for Audio Clips.
+    3. playback_times (list[list[uint, uint], ...]): a list of lists, each sub-list consists of two integers, where the first int represents the bar number (Zero-based, range from 0 to total bars of the song - 1 inclusively) and the second int represents the step number (Zero-based, 1 bar = 16 steps, so range from 0 to 15 inclusively) in bar-step-tick time units. The clip will be played on these time markers, for example, [[0, 0], [8, 8]] means the clip will be played at both the beginning of the song and the 8th bar and 8th step of the song.
+    4. track_location (string): the track_name of a Track you have generated, this indicates where the clip is placed vertically, note that track with track_type "MIDI" can only accept MIDI Clips, and tracks with track_type "Audio" can only accept Audio Clips.
+
+### MIDI Clip
+    Attributes:
+        1. midi_type (string): must be one of ['Composite', 'Chord', 'Bass', 'Melody', 'Arp'];
+        2. midi_length (int): the length of the clip in unit of bars, eg. 4 means 4 bars;
+        3. root_progression (list/null): can be null or a list of integers, if specified, the list of integers means root number progression in the scale, eg, [4, 5, 3, 6] means a typical pop song progression.
+    Data Format (for one MIDI Clip) (list):
+        [{clip_name}, {clip_type}, {playback_times}, {track_location}, {midi_type}, {midi_length}, {root_progression}]
+    Examples:
+        E1. [
+                "clip_main_piano",
+                "MIDI",
+                [[0, 0], [4, 0], [8, 0], [12, 0], [16, 0]],
+                "track_main_piano",
+                "Composite",
+                4,
+                [1, 5, 6, 4]
+            ]
+        E2. [
+                "clip_melody_lead",
+                "MIDI",
+                [[8, 0], [12, 0], [16, 0]],
+                "track_melody_lead",
+                "Melody",
+                4,
+                null
+            ]
+
+### Audio Clip
+    Attributes:
+        1. audio_type (string): must be one of ['Keys', 'AcousticGuitar', 'ElectricGuitar', 'MutedGuitar', 'BassGuitar', 'String', 'Horn', 'Kick', 'Snare', 'Clap', 'Snap', 'ClosedHihat', 'OpenHihat', 'Rides', 'Percussion', 'Breakbeat', 'Drummer', 'Foley', 'Cymbal', 'DrumFill', 'BuildUp', 'DrumTop', 'DrumFull', 'Texture', 'Bass', 'Bass808', 'Melody', 'Vocal', 'Arp', 'Noise', 'SweepUp', 'SweepDown', 'Riser', 'ReversedSynth', 'ReversedVocal', 'ReversedGuitar', 'ReverseCymbal', 'Stab', 'Impact', 'Ambiance', 'SubDrop', 'ReverseSynth'];
+        2. query (list): a list of keyword strings that describe the audio sample, such as the instrument used, the mood, song type, stuff like that, eg. ['Piano', 'Sad'], ['Snare', 'Kpop'];
+        3. loop (bool): indicates whether this clip should be a sample loop or a one-shot sample;
+    Data Format (for one MIDI Clip) (list):
+        [{clip_name}, {clip_type}, {playback_times}, {track_location}, {audio_type}, {query}, {loop}]
+    Examples:
+        E1. [
+                "clip_snare",
+                "Audio",
+                [[0, 4], [0, 12], [1, 4], [1, 12], [2, 4], [2, 12], [3, 4], [3, 12], [4, 4], [4, 12], [5, 4], [5, 12], [6, 4], [6, 12], [7, 4], [7, 12]],
+                "track_snare",
+                "Snare",
+                [
+                    "Snare",
+                    "Tight",
+                    "Pop"
+                ],
+                false
+            ]
+        E2. [
+                "clip_riser_fx",
+                "Audio",
+                [[7, 0], [15, 0]],
+                "track_riser",
+                "Riser",
+                [
+                    "Riser",
+                    "Swelling"
+                ],
+                false
+            ]
+        E3. [
+                "clip_drum_top_loop",
+                "Audio",
+                [[0, 0], [4, 0], [8, 0], [12, 0], [16, 0]],
+                "track_drum_top",
+                "DrumTop",
+                [
+                    "Drum Top",
+                    "Groovy"
+                ],
+                true
+            ]
+
+Instruction:
+    To generate the clips of the song, you need to generate multiple MIDI Clip and/or Audio Clip data and put them together in a single list.
+    The Clips (whether MIDI or Audio) are mostly less than or equal to 4 bars long, so remember to enrich the 'playback_times' attribute so it can play multiple times and fulfill the composition.
+
+# Output Format
+    Help the user to generate the elements based on the user's requirements.
+    Do Not ask the user any questions. Respond with JSON formatted data ONLY, no extra texts. Use keys "Tracks", and "Clips", with values as your generated content.
+    Your output should look something like this:
+    {
+        'Tracks': [...],
+        'Clips': [...]
+    }
+
+# Important Notes:
+- a) All element names (across different element types) must be unique.
+- b) You should always use Audio Clips for drums (including kick, clap, hihat, etc.), fx, and textures.
+- c) If you want to add many elements to 'playback_times' list, just write the full result.
+- d) Do Not write something like "[i, 0] for i in range(0, N, 4)", remember you are outputting JSON data, not Python code!
+- e) Enrich your composition, it should be a comprehensive song rather than a draft.
+- f) Do not leave any empty time gap in your composition, there should always be something playing from start to end.
+
+
+Additional Context (User Prompt):  
+    Please compose an electronic music song. Feel free to choose any instruments you like on your own. The tempo is about 120, and the mood is happy. Your generation should be completely provided, and should be close to real-world music production, your result should contain about 20+ tracks, 20+ clips.
+</pre>
+
+**MusicGen Prompt:**
 We use MusicGen-Large-3.3B model as the baseline, with prompts that specify tonality, tempo, and song structure. To enable structural awareness during generation, we modify the model's inference process by adding explicit structure context after the initial text prompt in each generation step, instructing the model to align its output with the given structure. The "_Structure Context_" part is replaced in each generation step. An example of a full prompt used in one generation step is as follows:
 
 <pre style="text-align: left; white-space: pre-wrap; word-break: normal;">
