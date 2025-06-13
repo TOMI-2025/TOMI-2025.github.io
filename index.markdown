@@ -37,7 +37,7 @@ Here is the outline of this page:
 4. **Prompt Design**
 
 <div class="center-stuff"><img src="/assets/pics/tomi_structure.jpg" style="width:600px" alt=""></div>
-<p align="center"><strong>Concept hierarchy in TOMI</strong>: <em>music ideas</em>, which are developed from features into music clips, are transformed and integrated into the <em>final composition</em> organized by sections and tracks.</p>
+<p align="center"><strong>Concept hierarchy in TOMI</strong>: music ideas developed from features to clips are transformed and integrated into the composition, organized by sections and tracks.</p>
 
 
 ---
@@ -534,9 +534,9 @@ The prompt structures are provided at the end of this section.
 ---
 <a id="prompt-design"></a>
 ## 4. Prompt Design
-**TOMI Prompt:**
+### 4.1 TOMI Prompt
+**System Prompt**: 
 Our prompt design for in-context learning is structured as follows:
-
 <pre style="text-align: left; white-space: pre-wrap; word-break: normal;">
 You are a professional music producer using a framework called TOMI to make music.
 To use TOMI, you need to generate a temporal arrangement and some 'nodes' that describe the content of your music through some guidelines, then generate some 'composition links' that connect the nodes to finish the song.
@@ -654,7 +654,7 @@ Follow the instructions below to generate each module of TOMI:
         The key component to arrange the song, which let you put the clips onto different tracks in different sections with proper playback pattern. To understand what a Transformation does, imagine you are just creating some empty clips on the arrangement view in Ableton, then fill it with MIDI clips and/or audio clips. In TOMI, you can see the Transformation nodes as those empty clips but already have the desired 'shape', the Transformations will then be connected to the clips and sections, making the clips to fit its playback patterns, there are 3 categories of Transformations: General Transform, Drum Transform, and Fx Transform, you need to fill the attributes for the Transformation in its corresponding format.
     Shared Attributes:
         1. transform_name (string): the name of the Transformation node, should begin with "transform_";
-        2. transform_type (string): "general_transform" for General Transform nodes, "drum_transform" for Drum Transform nodes, "fx_transform" for Fx Transform nodes, and 'fill_transform' for Fill Transform nodes.
+        2. transform_type (string): "general_transform" for General Transform nodes, "drum_transform" for Drum Transform nodes, and "fx_transform" for Fx Transform nodes.
 
 ### General Transform
     Feature:
@@ -720,7 +720,7 @@ Follow the instructions below to generate each module of TOMI:
 
 ### Fx Transform
     Feature:
-        A Fx Transform node is designed for fx clips like riser, fallers, etc.
+        A Fx Transform node is designed for fx clips like riser and fallers. You can also use it for drum fills, which are treated as risers (attach to the end of a section).
     Attributes:
         1. is_faller (bool): True for faller fx and False for riser fx. If True, the start of the linked fx clips will be attached to the start of the section; if False, the end of the linked fx clips will be attached to the end time of the section.
     Data Format (for one Fx Transform) (list):
@@ -736,17 +736,6 @@ Follow the instructions below to generate each module of TOMI:
                 "fx_transform",
                 true
             ]
-
-### Fill Transform
-    Feature:
-        A Fill Transform node is designed for drum fills & build-up drums which are used as 'fill' elements, the clips will be attached to the end of the section.
-    Data Format (for one Fill Transform) (list):
-        [{transform_name}, {transform_type}]
-    Examples:
-        E1. ["transform_short_fill", "fill_transform"]
-        E2. ["transform_build_up_loop", "fill_transform"]
-    Instruction:
-        To generate the transformations for the song, you need to generate multiple Transformation nodes of the 3 categories based on your needs, and put them in a single list. Use General Transform for most music clips; use Fx Transform for riser (sweep-up, uplifter, reverse-cymbal, etc.) and faller (impact, downlifter, exhaust, etc.) samples; use Fill Transform for drum fill audio samples; Importantly, for drum percussion, please prefer using drum sample loops with General Transform, especially the top drums; you can still use Drum Transform with one-shot samples for some main elements like kick & snare & clap to create the rhythmic pattern you want.
 
 # Step 3. Composition Link
     Description:  
@@ -788,14 +777,37 @@ Follow the instructions below to generate each module of TOMI:
 - f) You should always use Audio Clips for drums, fx, and textures.
 - g) For ANY bass elements (including bassline, sub-bass, 808, etc.), you MUST use MIDI Clips and set the 'dependent_midi' attribute to an already generated Chord MIDI Clip.
 - h) The 'Links' part should have enough composition links that can utilize all nodes you have generated.
-
-
-Additional Context (User Prompt):  
-    Please compose an electronic music song. Feel free to choose any instruments you like on your own. The tempo is about 120, and the mood is happy. Your generation should be completely provided, and should be close to real-world music production.
 </pre>
 
-**Standalone LLM (TOMI w/o Composition Links) Prompt:**
-In this ablation, we remove the composition links representation from TOMI, and redesign the prompt as follows:
+**User Prompt**: We can provide additional context in the user prompt and ask the LLM to generate a song arrangement in TOMI data structure. Note that we append the sentence 'Your result should contain about 50+ clips, 20+ tracks, 30+ transformations, and 60+ links' to the end of the user prompt. While the LLM (GPT-4o in our experiments) may still not generate content at this scale, this addition effectively encourages the model to produce more output compared to when the sentence is omitted.
+<pre style="text-align: left; white-space: pre-wrap; word-break: normal;">
+Please compose an electronic music song. Feel free to choose any instruments you like on your own. The tempo is about 120, and the mood is happy. Your generation should be completely provided, and should be close to real-world music production. Your result should contain about 50+ clips, 20+ tracks, 30+ transformations, and 60+ links.
+</pre>
+
+**User Prompt (Given Song Structure Context)**: In our experiments, we incorporate the predefined song structure into the user prompt to guide the LLM’s generation. An example follows:
+<pre style="text-align: left; white-space: pre-wrap; word-break: normal;">
+Given this song structure and sections:
+{
+"Structure": ["Intro", "Verse1", "PreChorus", "Chorus1", "Verse2", "PreChorus", "Chorus2", "Bridge", "Chorus3", "Outro"],
+"Sections": [
+        ["Intro", "Intro", 8], 
+        ["Verse1", "Verse", 16], 
+        ["PreChorus", "PreChorus", 8], 
+        ["Chorus1", "Chorus", 16], 
+        ["Verse2", "Verse", 16], 
+        ["PreChorus", "PreChorus", 8], 
+        ["Chorus2", "Chorus", 16], 
+        ["Bridge", "Bridge", 8], 
+        ["Chorus3", "Chorus", 16], 
+        ["Outro", "Outro", 8]
+    ]
+}
+Please compose an electronic music song. Feel free to choose any instruments you like on your own. The tempo is about 120, and the mood is happy. Your generation should be completely provided, and should be close to real-world music production. Your result should contain about 50+ clips, 20+ tracks, 30+ transformations, and 60+ links.
+</pre>
+
+### 4.2 Standalone LLM (TOMI w/o Composition Links) Prompt
+**System Prompt**:
+In this ablation study, we remove the composition link representation from TOMI and redesign the prompt to allow for more direct generation:
 <pre style="text-align: left; white-space: pre-wrap; word-break: normal;">
 You are a professional music producer.
 To make a song step by step, first you can treat a song arrangement as a 2D canvas, where the X-axis being the timeline and Y-axis being the tracks. You will need to generate the following parts in order:
@@ -917,13 +929,19 @@ Instruction:
 - d) Do Not write something like "[i, 0] for i in range(0, N, 4)", remember you are outputting JSON data, not Python code!
 - e) Enrich your composition, it should be a comprehensive song rather than a draft.
 - f) Do not leave any empty time gap in your composition, there should always be something playing from start to end.
-
-
-Additional Context (User Prompt):  
-    Please compose an electronic music song. Feel free to choose any instruments you like on your own. The tempo is about 120, and the mood is happy. Your generation should be completely provided, and should be close to real-world music production, your result should contain about 20+ tracks, 20+ clips.
 </pre>
 
-**MusicGen Prompt:**
+**User Prompt**:  
+<pre style="text-align: left; white-space: pre-wrap; word-break: normal;">
+Please compose an electronic music song. Feel free to choose any instruments you like on your own. The tempo is about 120, and the mood is happy. Your generation should be completely provided, and should be close to real-world music production, your result should contain about 20+ tracks and 50+ clips.
+</pre>
+
+**User Prompt (Given Song Structure Context)**:
+<pre style="text-align: left; white-space: pre-wrap; word-break: normal;">
+Given this song structure: [Intro(8bars), Verse(16bars), PreChorus(8bars), Chorus(16bars), Verse(16bars), PreChorus(8bars), Chorus(16bars), Bridge(8bars), Chorus(16bars), Outro(8bars)], the total length is 120 bars. Please make a {genre} instrumental song. Feel free to choose any instruments you like on your own. The tempo is about 120, mood is happy. Your generation should be completely provided, and should be close to real world music production, which means your result should contain about 20+ tracks, 50+ clips.
+</pre>
+
+### 4.3 MusicGen Prompt
 We use MusicGen-Large-3.3B model as the baseline, with prompts that specify tonality, tempo, and song structure. To enable structural awareness during generation, we modify the model's inference process by adding explicit structure context after the initial text prompt in each generation step, instructing the model to align its output with the given structure. The "_Structure Context_" part is replaced in each generation step. An example of a full prompt used in one generation step is as follows:
 
 <pre style="text-align: left; white-space: pre-wrap; word-break: normal;">
