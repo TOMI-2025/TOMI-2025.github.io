@@ -17,16 +17,17 @@ layout: home
 <p style="text-align: center;">
     Qi He, Ziyu Wang, Gus Xia @<a href="http://www.musicxlab.com/">MusicXLab</a>
     <br>
-    <a href="">[Paper]</a> <a href="https://github.com/heqi201255/TOMI_v1">[Code Repo]</a>
+    <a href="">[Paper]</a> <a href="https://github.com/heqi201255/TOMI">[Code Repo]</a>
 </p>
 
 This is the demo page for the paper: _TOMI: Transforming and Organizing Music Ideas for Multi-Track Compositions with Full-Song Structure_. We propose the TOMI (Transforming and Organizing Music Ideas) paradigm for high-level music data representation. 
 TOMI models a musical piece as a sparse, four-dimensional space defined by **clips** (short audio or MIDI segments), 
-**sections** (temporal positions), **tracks** (instrument layers), and **transformations** (elaboration methods). 
+**sections** (temporal positions), **tracks** (instrument layers), and **transformations** (elaboration methods).
+We represent these concepts as nodes in our data structure and define **composition links**, each a quadruple of nodes, to specify a music clip (what) to be placed in a particular section (when) and on a specific track (where), undergoing certain transformations (how). Nodes are reusable across links, forming a structured representation of the complete composition.
 Based on this, we achieve the first electronic music generation system 
 to produce long-term, multi-track compositions containing both MIDI and audio clips, while achieving **robust structural consistency** and **high music quality**. We use 
 a foundation text-based large language model (LLM) with TOMI data structure and achieve multi-track electronic music generation with full-song structure through **in-context-learning** (ICL) and sample retrieval. 
-Moreover, we integrate TOMI with the REAPER digital audio workstation (DAW) to provide an interactive workflow and exports audio of high-resolution. 
+Moreover, we integrate TOMI with the REAPER digital audio workstation (DAW) to allow for human-AI co-creation and high-resolution audio rendering. 
 
 
 Here is the outline of this page:
@@ -35,9 +36,10 @@ Here is the outline of this page:
 2. **Digital Audio Workstation Integration** (Video demo)
 3. **More Examples with Comparison** (All Audios used in our experiments)
 4. **Prompt Design**
+5. **Sample Retrieval Process**
 
 <div class="center-stuff"><img src="/assets/pics/tomi_structure.jpg" style="width:600px" alt=""></div>
-<p align="center"><strong>Concept hierarchy in TOMI</strong>: music ideas developed from features to clips are transformed and integrated into the composition, organized by sections and tracks.</p>
+<p align="center"><strong>Figure 1: Concept hierarchy in TOMI</strong>: music ideas developed from features to clips are transformed and integrated into the composition, organized by sections and tracks.</p>
 
 
 ---
@@ -63,16 +65,17 @@ Let's have a listen to this section (8-bar) at 120BPM and 4/4 time signature:
 
 \\
 Now, let's break down this piece and see how the data can be represented in TOMI data structure, we show the examples of applying transformations on raw clips in an **8-bar section**. 
-In our implementation, we define 3 subclasses of transformations to handle different scenarios: (1) **Drum Transform** for one-shot drums, (2) **Fx Transform** for riser and faller sound effects, and (3) **General Transform** for other cases.
+In our implementation, we define 3 subclasses of transformations to handle different scenarios: (1) **Drum Transform** for one-shot drums, (2) **Fx Transform** for riser 
+and faller sound effects, and (3) **General Transform** for other cases.
 We use an _**action sequence**_ in transformations to control the rhythmic pattern, looping, and placement of clips within sections.
-In _**action sequence**_, there are three state types allowed to control the rhythmic pattern of clips, we use "►" to denote the _**onset**_ state, "=" to
+In _**action sequence**_, there are three state types allowed to control the rhythmic pattern of clips. We use "►" to denote the _**onset**_ state, "=" to
 denote the _**sustain**_ state, and "-" to denote the _**rest**_ state. Each state corresponds to an action 
-at a step time within the section (eg. a bar has 16 steps in the 4/4 time signature), which means all transformations are limited to 16th note patterns. 
+at a step time within the section (e.g., a bar has 16 steps in the 4/4 time signature), which means all transformations are limited to 16th note patterns. 
 The _**onset**_ state means the clip will 
-be replayed at this time, _**rest**_ means the clip will stop playing, and _**sustain**_ means to continue playing.
+be replayed at this time, _**rest**_ means the clip will stop playing, and _**sustain**_ means to continue playing. 
 For **Fx Transform**, it is designed for riser and faller sound effects, so it only needs a _**placement**_ parameter to specify whether the 
 clips are placed left- or right-aligned within sections. Then, its _**action sequence**_ is dynamically computed in the backend for each composition link.
-
+The primary distinction between General Transform nodes and Drum Transform or Fx Transform nodes lies in the fact that the latter are limited to controlling clip arrangement/placement. However, this capability is still classified as a transformation within our framework.
 
 Details are shown in the table below.
 
@@ -537,7 +540,9 @@ The prompt structures are provided at the end of this section.
 ### 4.1 TOMI Prompt
 **System Prompt**: 
 Our prompt design for in-context learning is structured as follows:
-<pre style="text-align: left; white-space: pre-wrap; word-break: normal;">
+
+(_scrollable_)
+<pre class="prompt">
 You are a professional music producer using a framework called TOMI to make music.
 To use TOMI, you need to generate a temporal arrangement and some 'nodes' that describe the content of your music through some guidelines, then generate some 'composition links' that connect the nodes to finish the song.
 Follow the instructions below to generate each module of TOMI:
@@ -617,11 +622,11 @@ Follow the instructions below to generate each module of TOMI:
         1. clip_name (string): name of the clip, should begin with "clip_";
         2. clip_type (string): always "Audio";
         3. audio_type (string): must be one of ['Keys', 'AcousticGuitar', 'ElectricGuitar', 'MutedGuitar', 'BassGuitar', 'String', 'Horn', 'Kick', 'Snare', 'Clap', 'Snap', 'ClosedHihat', 'OpenHihat', 'Rides', 'Percussion', 'Breakbeat', 'Drummer', 'Foley', 'Cymbal', 'DrumFill', 'BuildUp', 'DrumTop', 'DrumFull', 'Texture', 'Bass', 'Bass808', 'Melody', 'Vocal', 'Arp', 'Noise', 'SweepUp', 'SweepDown', 'Riser', 'ReversedSynth', 'ReversedVocal', 'ReversedGuitar', 'ReverseCymbal', 'Stab', 'Impact', 'Ambiance', 'SubDrop', 'ReverseSynth'], use the one that best fit your choice, do not create values that is not in the list;
-        4. query (list): a list of keyword strings that describe the audio sample, such as the instrument used, the mood, song type, stuff like that, eg. ['Piano', 'Sad'], ['Snare', 'Kpop'];
+        4. keywords (list): a list of keyword strings that describe the audio sample, such as the instrument used, the mood, song type, stuff like that, eg. ['Piano', 'Sad'], ['Snare', 'Kpop'];
         5. loop (bool): indicates whether this clip should be a sample loop or a one-shot;
         6. reverse (bool): indicates whether this clip should be reversed or not.
     Data Format (for one Audio Clip) (list):
-        [{clip_name}, {clip_type}, {audio_type}, {query}, {loop}, {reverse}]
+        [{clip_name}, {clip_type}, {audio_type}, {keywords}, {loop}, {reverse}]
     Examples:
         E1. [
                 "clip_electric_guitar_melody",
@@ -780,12 +785,12 @@ Follow the instructions below to generate each module of TOMI:
 </pre>
 
 **User Prompt**: We can provide additional context in the user prompt and ask the LLM to generate a song arrangement in TOMI data structure. Note that we append the sentence 'Your result should contain about 50+ clips, 20+ tracks, 30+ transformations, and 60+ links' to the end of the user prompt. While the LLM (GPT-4o in our experiments) may still not generate content at this scale, this addition effectively encourages the model to produce more output compared to when the sentence is omitted.
-<pre style="text-align: left; white-space: pre-wrap; word-break: normal;">
+<pre class="prompt">
 Please compose an electronic music song. Feel free to choose any instruments you like on your own. The tempo is about 120, and the mood is happy. Your generation should be completely provided, and should be close to real-world music production. Your result should contain about 50+ clips, 20+ tracks, 30+ transformations, and 60+ links.
 </pre>
 
 **User Prompt (Given Song Structure Context)**: In our experiments, we incorporate the predefined song structure into the user prompt to guide the LLM’s generation. An example follows:
-<pre style="text-align: left; white-space: pre-wrap; word-break: normal;">
+<pre class="prompt">
 Given this song structure and sections:
 {
 "Structure": ["Intro", "Verse1", "PreChorus", "Chorus1", "Verse2", "PreChorus", "Chorus2", "Bridge", "Chorus3", "Outro"],
@@ -808,7 +813,9 @@ Please compose an electronic music song. Feel free to choose any instruments you
 ### 4.2 Standalone LLM (TOMI w/o Composition Links) Prompt
 **System Prompt**:
 In this ablation study, we remove the composition link representation from TOMI and redesign the prompt to allow for more direct generation:
-<pre style="text-align: left; white-space: pre-wrap; word-break: normal;">
+
+(_scrollable_)
+<pre class="prompt">
 You are a professional music producer.
 To make a song step by step, first you can treat a song arrangement as a 2D canvas, where the X-axis being the timeline and Y-axis being the tracks. You will need to generate the following parts in order:
 
@@ -866,10 +873,10 @@ Shared Attributes:
 ### Audio Clip
     Attributes:
         1. audio_type (string): must be one of ['Keys', 'AcousticGuitar', 'ElectricGuitar', 'MutedGuitar', 'BassGuitar', 'String', 'Horn', 'Kick', 'Snare', 'Clap', 'Snap', 'ClosedHihat', 'OpenHihat', 'Rides', 'Percussion', 'Breakbeat', 'Drummer', 'Foley', 'Cymbal', 'DrumFill', 'BuildUp', 'DrumTop', 'DrumFull', 'Texture', 'Bass', 'Bass808', 'Melody', 'Vocal', 'Arp', 'Noise', 'SweepUp', 'SweepDown', 'Riser', 'ReversedSynth', 'ReversedVocal', 'ReversedGuitar', 'ReverseCymbal', 'Stab', 'Impact', 'Ambiance', 'SubDrop', 'ReverseSynth'];
-        2. query (list): a list of keyword strings that describe the audio sample, such as the instrument used, the mood, song type, stuff like that, eg. ['Piano', 'Sad'], ['Snare', 'Kpop'];
+        2. keywords (list): a list of keyword strings that describe the audio sample, such as the instrument used, the mood, song type, stuff like that, eg. ['Piano', 'Sad'], ['Snare', 'Kpop'];
         3. loop (bool): indicates whether this clip should be a sample loop or a one-shot sample;
     Data Format (for one MIDI Clip) (list):
-        [{clip_name}, {clip_type}, {playback_times}, {track_location}, {audio_type}, {query}, {loop}]
+        [{clip_name}, {clip_type}, {playback_times}, {track_location}, {audio_type}, {keywords}, {loop}]
     Examples:
         E1. [
                 "clip_snare",
@@ -932,19 +939,33 @@ Instruction:
 </pre>
 
 **User Prompt**:  
-<pre style="text-align: left; white-space: pre-wrap; word-break: normal;">
+<pre class="prompt">
 Please compose an electronic music song. Feel free to choose any instruments you like on your own. The tempo is about 120, and the mood is happy. Your generation should be completely provided, and should be close to real-world music production, your result should contain about 20+ tracks and 50+ clips.
 </pre>
 
 **User Prompt (Given Song Structure Context)**:
-<pre style="text-align: left; white-space: pre-wrap; word-break: normal;">
+<pre class="prompt">
 Given this song structure: [Intro(8bars), Verse(16bars), PreChorus(8bars), Chorus(16bars), Verse(16bars), PreChorus(8bars), Chorus(16bars), Bridge(8bars), Chorus(16bars), Outro(8bars)], the total length is 120 bars. Please make a {genre} instrumental song. Feel free to choose any instruments you like on your own. The tempo is about 120, mood is happy. Your generation should be completely provided, and should be close to real world music production, which means your result should contain about 20+ tracks, 50+ clips.
 </pre>
 
 ### 4.3 MusicGen Prompt
 We use MusicGen-Large-3.3B model as the baseline, with prompts that specify tonality, tempo, and song structure. To enable structural awareness during generation, we modify the model's inference process by adding explicit structure context after the initial text prompt in each generation step, instructing the model to align its output with the given structure. The "_Structure Context_" part is replaced in each generation step. An example of a full prompt used in one generation step is as follows:
 
-<pre style="text-align: left; white-space: pre-wrap; word-break: normal;">
+<pre class="prompt">
 (1) Initial Prompt: Generate an electronic music track at 120 BPM in C major. Follow this structure: 8-bar intro, 16-bar verse, 8-bar pre-chorus, 16-bar chorus, 16-bar verse, 8-bar pre-chorus, 16-bar chorus, 8-bar bridge, 16-bar chorus, 8-bar outro.
 (2) Structure Context: For now, you are generating the segment between the 120th second and the 150th second, which corresponds to the the 60th bar and the 75th bar regarding the whole song, your output should include 4 bars of PreChorus, 8 bars of Chorus, and 3 bars of Outro of the song structure.
 </pre>
+
+---
+<a id="sample-retrieval-process"></a>
+## 5. Sample Retrieval Process
+<div class="center-stuff"><img src="/assets/pics/sample_retrieval.jpg" style="width:85%" alt=""></div>
+<p align="center"><strong>Figure 2: Sample Retrieval Process Demonstration</strong></p>
+The retrieval process for both MIDI and audio clips is shown in the figure above. For each clip, a corresponding SQLite3 query is constructed based on its attributes generated by the LLM. These queries may incorporate global song-level parameters such as genre and tempo. The database then returns a set of matching entries, from which a single clip is randomly selected as the final clip.
+
+Each retrieved sample retains its original tempo and key within the clip, but is dynamically time- and pitch-stretched in REAPER to match the global tempo/key settings. For MIDI clips, we manually tagged the MIDI samples with genre labels, so the genre condition is included in MIDI queries. Additionally, as shown in the "_LLM MIDI Clip Output 2_" example, bass clips are a special case where the LLM is instructed to reuse the bass stem from a pre-generated chord clip (using the `MIDIProcessor` tool in our code repository) to ensure harmonic coherence within the same section.
+
+For audio clips, the sample tempo during retrieval is constrained within a [tempo–20, tempo+20] range to avoid large stretching factors. Keyword filtering is applied, followed by relevance-based ranking. We do not enforce genre conditions in audio queries, as many clips (e.g., kicks, Fx) are not genre-specific. Instead, the genre is provided in the user prompt, allowing the LLM to decide whether to include it as a keyword.
+
+The effectiveness of this retrieval process relies heavily on the quality and quantity of the user’s local sample library. When no matching sample is found, the corresponding clip and its related structure will be bypassed. We plan to improve robustness in such cases in the future.
+ 

@@ -186,3 +186,13 @@ midi-visualizer svg rect.note.active {
     opacity: 0.9;
     stroke: #000;
 }
+
+pre.prompt {
+    text-align: left;
+    white-space: pre-wrap;
+    word-break: normal;
+    font-size: 10pt;
+    max-height: 28em;
+    line-height: 1.5em;
+    overflow-y: scroll;
+}
