@@ -17,7 +17,7 @@ layout: home
 <p style="text-align: center;">
     Qi He, Ziyu Wang, Gus Xia @<a href="http://www.musicxlab.com/">MusicXLab</a>
     <br>
-    <a href="">[Paper]</a> <a href="https://github.com/heqi201255/TOMI">[Code Repo]</a>
+    <a href="">[Paper]</a> <a href="https://github.com/heqi201255/TOMI">[Code]</a>
 </p>
 
 This is the demo page for the paper: _TOMI: Transforming and Organizing Music Ideas for Multi-Track Compositions with Full-Song Structure_. We propose the TOMI (Transforming and Organizing Music Ideas) paradigm for high-level music data representation. 
