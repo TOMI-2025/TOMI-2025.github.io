@@ -15,7 +15,7 @@ layout: home
 </head>
 
 <p style="text-align: center;">
-    Qi He, Ziyu Wang, Gus Xia @<a href="http://www.musicxlab.com/">MusicXLab</a>
+    Qi He, Gus Xia, and Ziyu Wang @<a href="http://www.musicxlab.com/">MusicXLab</a>
     <br>
     <a href="">[Paper]</a> <a href="https://github.com/heqi201255/TOMI">[Code]</a>
 </p>
@@ -534,6 +534,10 @@ The prompt structures are provided at the end of this section.
 </table>
 </div>
 
+In our experiments, TOMI typically generates around 20–25 tracks per song, with a duration of less than 5 minutes and covering multiple sections. While this may fall short of the complexity found in commercial songs that can involve over a hundred tracks, it is sufficient to meet most musical needs.
+
+
+
 ---
 <a id="prompt-design"></a>
 ## 4. Prompt Design
@@ -784,7 +788,7 @@ Follow the instructions below to generate each module of TOMI:
 - h) The 'Links' part should have enough composition links that can utilize all nodes you have generated.
 </pre>
 
-**User Prompt**: We can provide additional context in the user prompt and ask the LLM to generate a song arrangement in TOMI data structure. Note that we append the sentence 'Your result should contain about 50+ clips, 20+ tracks, 30+ transformations, and 60+ links' to the end of the user prompt. While the LLM (GPT-4o in our experiments) may still not generate content at this scale, this addition effectively encourages the model to produce more output compared to when the sentence is omitted.
+**User Prompt**: We can provide additional context in the user prompt and ask the LLM to generate a song arrangement in TOMI data structure. Note that we append the sentence "_Your result should contain about 50+ clips, 20+ tracks, 30+ transformations, and 60+ links_" to the end of the user prompt. While the LLM (GPT-4o in our experiments) may still not generate content at this scale, this addition can encourage the model to produce more output compared to when the sentence is omitted.
 <pre class="prompt">
 Please compose an electronic music song. Feel free to choose any instruments you like on your own. The tempo is about 120, and the mood is happy. Your generation should be completely provided, and should be close to real-world music production. Your result should contain about 50+ clips, 20+ tracks, 30+ transformations, and 60+ links.
 </pre>
